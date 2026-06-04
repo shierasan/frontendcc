@@ -6,6 +6,7 @@ import { getApiService } from '@/lib/api-service';
 import { DynamicTable } from './dynamic-table';
 import { DynamicForm } from './dynamic-form';
 import { SchemaEditor } from './schema-editor';
+import { SchemaConfigEditor } from './schema-config-editor';
 import { ApiConfiguration } from './api-configuration';
 import { StatusIndicator } from './status-indicator';
 import { Modal } from './modal';
@@ -131,11 +132,18 @@ export function Dashboard() {
                 alt="Logo Unand"
                 className="h-12 w-auto"
               />
-              <div>
+              <div className="flex-1">
                 <h1 className="text-xl font-semibold text-foreground">Tugas Besar Cloud Computing 2026</h1>
-                <p className="text-xs text-muted-foreground">
-                  Tester dan kelola endpoint REST API Anda
-                </p>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                  <span>Tester dan kelola endpoint REST API Anda</span>
+                  {api.student && (
+                    <div className="flex items-center gap-2 pl-4 border-l border-border">
+                      <span className="font-medium">{api.student.name}</span>
+                      <span>•</span>
+                      <span>{api.student.nim}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -150,7 +158,14 @@ export function Dashboard() {
             <div className="space-y-4">
               <div className="bg-card border border-border rounded-lg p-5 hover:shadow-md transition-shadow">
                 <h2 className="text-sm font-semibold text-foreground mb-4">
-                  Konfigurasi
+                  Import Schema
+                </h2>
+                <SchemaConfigEditor />
+              </div>
+
+              <div className="bg-card border border-border rounded-lg p-5 hover:shadow-md transition-shadow">
+                <h2 className="text-sm font-semibold text-foreground mb-4">
+                  Konfigurasi API
                 </h2>
                 <ApiConfiguration />
               </div>
@@ -158,7 +173,7 @@ export function Dashboard() {
               {api.isConnected && (
                 <div className="bg-card border border-border rounded-lg p-5 hover:shadow-md transition-shadow">
                   <h2 className="text-sm font-semibold text-foreground mb-4">
-                    Skema
+                    Skema Manual
                   </h2>
                   <SchemaEditor />
                 </div>
@@ -199,6 +214,7 @@ export function Dashboard() {
                 </h2>
                 <DynamicTable
                   schema={api.schema}
+                  fields={api.fields}
                   data={records}
                   onEdit={handleEditRecord}
                   onDelete={handleDeleteRecord}

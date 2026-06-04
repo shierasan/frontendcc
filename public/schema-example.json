@@ -1,0 +1,48 @@
+{
+  "student": {
+    "name": "Muhammad Nouval Habibie",
+    "nim": "2311523001"
+  },
+  "resource": {
+    "name": "books",
+    "label": "Data Buku",
+    "description": "Aplikasi untuk mengelola data buku"
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Judul Buku",
+      "type": "text",
+      "required": true,
+      "showInTable": true
+    },
+    {
+      "name": "author",
+      "label": "Penulis",
+      "type": "text",
+      "required": true,
+      "showInTable": true
+    },
+    {
+      "name": "year",
+      "label": "Tahun Terbit",
+      "type": "number",
+      "required": false,
+      "showInTable": true
+    },
+    {
+      "name": "description",
+      "label": "Deskripsi",
+      "type": "textarea",
+      "required": false,
+      "showInTable": false
+    }
+  ],
+  "endpoints": {
+    "list": "/books",
+    "detail": "/books/{id}",
+    "create": "/books",
+    "update": "/books/{id}",
+    "delete": "/books/{id}"
+  }
+}

@@ -108,6 +108,18 @@ export function DynamicForm({
           </label>
         );
 
+      case 'textarea':
+        return (
+          <textarea
+            key={fieldName}
+            value={value}
+            onChange={(e) => handleChange(fieldName, e.target.value)}
+            placeholder={`Masukkan ${fieldName}`}
+            className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all h-24"
+            disabled={isSubmitting}
+          />
+        );
+
       case 'select':
         return (
           <select

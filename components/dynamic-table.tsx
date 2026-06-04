@@ -1,10 +1,11 @@
 'use client';
 
-import { ApiSchema } from '@/lib/api-context';
+import { ApiSchema, SchemaField } from '@/lib/api-context';
 import { Button } from '@/components/ui/button';
 
 export interface DynamicTableProps {
   schema: ApiSchema;
+  fields?: SchemaField[];
   data: Record<string, any>[];
   onEdit: (record: Record<string, any>) => void;
   onDelete: (id: string | number) => void;
@@ -20,6 +21,7 @@ export interface DynamicTableProps {
 
 export function DynamicTable({
   schema,
+  fields,
   data,
   onEdit,
   onDelete,
@@ -32,7 +34,17 @@ export function DynamicTable({
   onSearch,
   searchQuery,
 }: DynamicTableProps) {
-  const columns = Object.keys(schema);
+  // Gunakan fields dengan showInTable=true, fallback ke schema jika tidak ada
+  let columns: string[] = [];
+  
+  if (fields && fields.length > 0) {
+    columns = fields
+      .filter(f => f.showInTable !== false)
+      .map(f => f.name);
+  } else {
+    columns = Object.keys(schema);
+  }
+  
   const totalPages = Math.ceil(totalRecords / recordsPerPage);
   const hasId = data.length > 0 && 'id' in data[0];
 
