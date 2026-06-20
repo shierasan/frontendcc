@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useApi } from '@/lib/api-context';
 import { getApiService } from '@/lib/api-service';
-import { DynamicTable } from './dynamic-table';
-import { DynamicForm } from './dynamic-form';
+import { useEffect, useState } from 'react';
 import { ApiConfiguration } from './api-configuration';
-import { StatusIndicator } from './status-indicator';
+import { DynamicForm } from './dynamic-form';
+import { DynamicTable } from './dynamic-table';
 import { Modal } from './modal';
-import { useToast, ToastContainer } from './toast';
+import { StatusIndicator } from './status-indicator';
+import { ToastContainer, useToast } from './toast';
 
 type FormMode = 'create' | 'edit';
 
@@ -50,9 +50,9 @@ export function Dashboard() {
     if (api.isConnected && api.activeResource) {
       fetchRecords();
     }
-  }, [api.isConnected, api.activeResource, currentPage]);
+  }, [api.isConnected, api.activeResource, currentPage, searchQuery]);
 
-  const fetchRecords = async () => {
+  const fetchRecords = async (showSuccessToast = false) => {
     if (!api.baseUrl || !api.activeResource) return;
 
     setIsLoading(true);
@@ -73,7 +73,9 @@ export function Dashboard() {
       setRecords(result.data);
       api.setRecordCount(result.total);
       api.setLastResponseTime(result.responseTime);
-      addToast('Catatan berhasil dimuat', 'success');
+      if (showSuccessToast) {
+        addToast('Catatan berhasil dimuat', 'success');
+      }
     } catch (error: any) {
       addToast(error.message || 'Gagal memuat catatan', 'error');
       setRecords([]);

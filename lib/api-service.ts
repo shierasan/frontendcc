@@ -54,6 +54,69 @@ export class ApiService {
     return endpoint;
   }
 
+  private extractRecords(responseData: any): any[] {
+    if (Array.isArray(responseData)) {
+      return responseData;
+    }
+
+    return responseData.items || [];
+  }
+
+  private recordMatchesQuery(record: any, query: string): boolean {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return true;
+    }
+
+    const values: string[] = [];
+    const visit = (value: any) => {
+      if (value === null || value === undefined) {
+        return;
+      }
+
+      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+        values.push(String(value).toLowerCase());
+        return;
+      }
+
+      if (Array.isArray(value)) {
+        value.forEach(visit);
+        return;
+      }
+
+      if (typeof value === 'object') {
+        Object.values(value).forEach(visit);
+      }
+    };
+
+    visit(record);
+
+    return values.some((value) => value.includes(normalizedQuery));
+  }
+
+  private async getAllRecords(resource: string, batchSize: number = 100) {
+    const records: any[] = [];
+    let page = 1;
+
+    while (true) {
+      const response = await this.getRecords(resource, page, batchSize);
+      records.push(...response.data);
+
+      if (response.data.length < batchSize) {
+        break;
+      }
+
+      if (typeof response.total === 'number' && records.length >= response.total) {
+        break;
+      }
+
+      page += 1;
+    }
+
+    return records;
+  }
+
   async testConnection(): Promise<boolean> {
     try {
       const response = await this.axiosInstance.get('/');
@@ -73,7 +136,7 @@ export class ApiService {
       const endTime = performance.now();
 
       return {
-        data: Array.isArray(response.data) ? response.data : response.data.items || [],
+        data: this.extractRecords(response.data),
         total: response.data.total || (Array.isArray(response.data) ? response.data.length : 0),
         responseTime: endTime - startTime,
         status: response.status,
@@ -165,17 +228,17 @@ export class ApiService {
 
   async searchRecords(resource: string, query: string, limit: number = 10) {
     try {
-      const path = this.endpoints?.list || `/${resource}`;
       const startTime = performance.now();
-      const response = await this.axiosInstance.get(this.resolvePath(path), {
-        params: { search: query, limit },
-      });
+      const allRecords = await this.getAllRecords(resource, Math.max(limit, 100));
       const endTime = performance.now();
 
+      const records = allRecords.filter((record) => this.recordMatchesQuery(record, query));
+
       return {
-        data: Array.isArray(response.data) ? response.data : response.data.items || [],
+        data: records.slice(0, limit),
+        total: records.length,
         responseTime: endTime - startTime,
-        status: response.status,
+        status: 200,
       };
     } catch (error: any) {
       throw new Error(
